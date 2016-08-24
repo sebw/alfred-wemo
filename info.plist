@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>bundleid</key>
+	<string>be.wains.blog.wemo</string>
+	<key>category</key>
+	<string>Home automation</string>
+	<key>connections</key>
+	<dict>
+		<key>085F728D-1A72-4C0E-A9B2-44D95BB54E70</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>CF1EB8A1-CB41-44F0-8338-310C4DE74F8F</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+			</dict>
+		</array>
+		<key>6D8BA415-2EBA-4D8B-BD6C-40F3A91F5914</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>085F728D-1A72-4C0E-A9B2-44D95BB54E70</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+			</dict>
+		</array>
+	</dict>
+	<key>createdby</key>
+	<string>Sébastien Wains</string>
+	<key>description</key>
+	<string>Control Wemo switches</string>
+	<key>disabled</key>
+	<false/>
+	<key>name</key>
+	<string>Wemo v0.2</string>
+	<key>objects</key>
+	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argumenttype</key>
+				<integer>2</integer>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>keyword</key>
+				<string>wemo</string>
+				<key>queuedelaycustom</key>
+				<integer>3</integer>
+				<key>queuedelayimmediatelyinitially</key>
+				<true/>
+				<key>queuedelaymode</key>
+				<integer>0</integer>
+				<key>queuemode</key>
+				<integer>1</integer>
+				<key>runningsubtext</key>
+				<string>Please wait...</string>
+				<key>script</key>
+				<string># Specify your wemo IP's here separated by a space
+
+IP="10.10.12.1 10.10.12.2 10.10.12.3 10.10.12.4"
+
+### you should not change anything below
+
+echo "&lt;?xml version=\"1.0\"?&gt;&lt;items&gt;"
+for i in `echo ${IP}`
+do
+  NAME=`./wemo.sh ${i} GETFRIENDLYNAME`
+  SIGNAL=`./wemo.sh ${i} GETSIGNALSTRENGTH`
+  STATUS=`./wemo.sh ${i} GETSTATE`
+
+  echo "&lt;item uid=\"${i}\" arg=\"${i}:${NAME}:${STATUS}\"&gt;&lt;title&gt;${NAME} is ${STATUS}&lt;/title&gt;&lt;subtitle&gt;Signal: ${SIGNAL} / IP: ${i}&lt;/subtitle&gt;&lt;icon&gt;${STATUS}.png&lt;/icon&gt;&lt;/item&gt;"
+done 
+echo "&lt;/items&gt;"
+
+</string>
+				<key>subtext</key>
+				<string>Control your Wemo devices</string>
+				<key>title</key>
+				<string>Wemo</string>
+				<key>type</key>
+				<integer>0</integer>
+				<key>withspace</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.scriptfilter</string>
+			<key>uid</key>
+			<string>6D8BA415-2EBA-4D8B-BD6C-40F3A91F5914</string>
+			<key>version</key>
+			<integer>0</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>lastpathcomponent</key>
+				<false/>
+				<key>onlyshowifquerypopulated</key>
+				<true/>
+				<key>output</key>
+				<integer>0</integer>
+				<key>removeextension</key>
+				<false/>
+				<key>sticky</key>
+				<false/>
+				<key>text</key>
+				<string>{query}</string>
+				<key>title</key>
+				<string>Wemo</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.output.notification</string>
+			<key>uid</key>
+			<string>CF1EB8A1-CB41-44F0-8338-310C4DE74F8F</string>
+			<key>version</key>
+			<integer>0</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>concurrently</key>
+				<false/>
+				<key>escaping</key>
+				<integer>110</integer>
+				<key>script</key>
+				<string># input is in the format "IP:NAME:STATUS"
+
+IP=`echo {query} | awk -F':' '{print $1}'`
+NAME=`echo {query} | awk -F':' '{print $2}'`
+STATUS=`echo {query} | awk -F':' '{print $3}'`
+
+echo -n "$NAME "
+
+# We change the status
+if [ "$STATUS" == "ON" ]; then
+	./wemo.sh ${IP} OFF &gt; /dev/null
+	echo "is OFF"
+elif [ "$STATUS" == "OFF" ]; then
+	./wemo.sh ${IP} ON &gt; /dev/null
+	echo "is ON"
+fi</string>
+				<key>type</key>
+				<integer>0</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>uid</key>
+			<string>085F728D-1A72-4C0E-A9B2-44D95BB54E70</string>
+			<key>version</key>
+			<integer>0</integer>
+		</dict>
+	</array>
+	<key>readme</key>
+	<string>You should edit the trigger and specify the IP of your switches there (your switches should have a static IP).
+
+For some reason my devices run on port 49153 and 49154. You might need to update wemo.sh if your switch run on 49152.</string>
+	<key>uidata</key>
+	<dict>
+		<key>085F728D-1A72-4C0E-A9B2-44D95BB54E70</key>
+		<dict>
+			<key>ypos</key>
+			<real>10</real>
+		</dict>
+		<key>6D8BA415-2EBA-4D8B-BD6C-40F3A91F5914</key>
+		<dict>
+			<key>ypos</key>
+			<real>10</real>
+		</dict>
+		<key>CF1EB8A1-CB41-44F0-8338-310C4DE74F8F</key>
+		<dict>
+			<key>ypos</key>
+			<real>10</real>
+		</dict>
+	</dict>
+	<key>webaddress</key>
+	<string>https://blog.wains.be</string>
+</dict>
+</plist>
